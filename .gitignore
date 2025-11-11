@@ -1,0 +1,27 @@
+# Log files
+*.log
+nohup.out
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+/tmp/
+*.tmp
+*.bak
+
+# Testing
+.pytest_cache/
+__pycache__/
+
+# Dependencies (if added later)
+node_modules/
+package-lock.json
