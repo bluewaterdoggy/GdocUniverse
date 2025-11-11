@@ -14,7 +14,7 @@ An interactive gravity physics simulation application that allows users to explo
 - Educational tool for learning physics
 - Built with React and TypeScript
 
-**Try it now:** [Open Gravity Sim](https://ai.studio/apps/drive/1_3w2iECDvLcl4fgBlo_dTOeYOBy7ljjj)
+**Try it now:** [Open Gravity Sim](https://aistudio.google.com/apps/drive/1_3w2iFCDvLcl4fgBlo_dTOeYOBy7ljjj)
 
 ## Getting Started
 
