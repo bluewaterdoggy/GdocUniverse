@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ohm's Law Calculator</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .calc-box {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .calc-box h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        .calc-symbol {
+            font-size: 3rem;
+            color: #764ba2;
+            margin: 1rem 0;
+        }
+        .result {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-top: 1rem;
+            min-height: 2rem;
+        }
+        .formula-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 2rem 0;
+        }
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>⚡ Ohm's Law Calculator</h1>
+        </div>
+    </header>
+
+    <main class="simulation-container">
+        <a href="../index.html" class="back-link">← Back to All Simulations</a>
+        
+        <div class="simulation-header">
+            <p>Explore the relationship between Voltage, Current, and Resistance!</p>
+        </div>
+
+        <div class="formula-display">
+            V = I × R
+        </div>
+
+        <div class="calculator-grid">
+            <div class="calc-box">
+                <h3>Voltage (V)</h3>
+                <div class="calc-symbol">⚡</div>
+                <div class="control-group">
+                    <label for="voltage">Volts: <span id="voltageDisplay">12</span> V</label>
+                    <input type="range" id="voltage" min="0" max="50" value="12" step="0.5">
+                </div>
+                <div class="result" id="voltageResult"></div>
+            </div>
+
+            <div class="calc-box">
+                <h3>Current (I)</h3>
+                <div class="calc-symbol">🔌</div>
+                <div class="control-group">
+                    <label for="current">Amperes: <span id="currentDisplay">2</span> A</label>
+                    <input type="range" id="current" min="0" max="10" value="2" step="0.1">
+                </div>
+                <div class="result" id="currentResult"></div>
+            </div>
+
+            <div class="calc-box">
+                <h3>Resistance (R)</h3>
+                <div class="calc-symbol">🔧</div>
+                <div class="control-group">
+                    <label for="resistance">Ohms: <span id="resistanceDisplay">6</span> Ω</label>
+                    <input type="range" id="resistance" min="0.1" max="100" value="6" step="0.1">
+                </div>
+                <div class="result" id="resistanceResult"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h3 style="text-align: center; margin-bottom: 1rem;">Calculate Mode:</h3>
+            <div class="control-group">
+                <label>
+                    <input type="radio" name="calcMode" value="voltage" checked> Calculate Voltage (V = I × R)
+                </label>
+            </div>
+            <div class="control-group">
+                <label>
+                    <input type="radio" name="calcMode" value="current"> Calculate Current (I = V / R)
+                </label>
+            </div>
+            <div class="control-group">
+                <label>
+                    <input type="radio" name="calcMode" value="resistance"> Calculate Resistance (R = V / I)
+                </label>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <h3>About Ohm's Law:</h3>
+            <p>Ohm's Law describes the relationship between voltage, current, and resistance in an electrical circuit:</p>
+            <ul>
+                <li><strong>Voltage (V):</strong> The electrical potential difference, measured in Volts (V). Think of it as electrical "pressure".</li>
+                <li><strong>Current (I):</strong> The flow of electric charge, measured in Amperes (A). This is the rate of charge flow.</li>
+                <li><strong>Resistance (R):</strong> Opposition to current flow, measured in Ohms (Ω). Materials with higher resistance restrict current more.</li>
+            </ul>
+            <p><strong>The formulas:</strong></p>
+            <ul>
+                <li>V = I × R (Voltage equals Current times Resistance)</li>
+                <li>I = V / R (Current equals Voltage divided by Resistance)</li>
+                <li>R = V / I (Resistance equals Voltage divided by Current)</li>
+            </ul>
+        </div>
+
+        <div class="info-panel">
+            <h3>Practical Example:</h3>
+            <p>If you have a 12V battery and a 6Ω resistor, the current flowing through the circuit would be:</p>
+            <p><strong>I = V / R = 12V / 6Ω = 2A</strong></p>
+            <p>This means 2 amperes of current would flow through the circuit.</p>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 GdocUniverse - Science Education Made Interactive</p>
+        </div>
+    </footer>
+
+    <script>
+        const voltageSlider = document.getElementById('voltage');
+        const currentSlider = document.getElementById('current');
+        const resistanceSlider = document.getElementById('resistance');
+        const voltageDisplay = document.getElementById('voltageDisplay');
+        const currentDisplay = document.getElementById('currentDisplay');
+        const resistanceDisplay = document.getElementById('resistanceDisplay');
+        const voltageResult = document.getElementById('voltageResult');
+        const currentResult = document.getElementById('currentResult');
+        const resistanceResult = document.getElementById('resistanceResult');
+        const calcModeRadios = document.querySelectorAll('input[name="calcMode"]');
+
+        function calculate() {
+            const voltage = parseFloat(voltageSlider.value);
+            const current = parseFloat(currentSlider.value);
+            const resistance = parseFloat(resistanceSlider.value);
+            const mode = document.querySelector('input[name="calcMode"]:checked').value;
+
+            // Clear all results
+            voltageResult.textContent = '';
+            currentResult.textContent = '';
+            resistanceResult.textContent = '';
+
+            // Disable/enable sliders based on mode
+            voltageSlider.disabled = mode === 'voltage';
+            currentSlider.disabled = mode === 'current';
+            resistanceSlider.disabled = mode === 'resistance';
+
+            let result;
+            switch(mode) {
+                case 'voltage':
+                    if (current > 0 && resistance > 0) {
+                        result = current * resistance;
+                        voltageSlider.value = result;
+                        voltageDisplay.textContent = result.toFixed(2);
+                        voltageResult.textContent = result.toFixed(2) + ' V';
+                    }
+                    break;
+                case 'current':
+                    if (voltage > 0 && resistance > 0) {
+                        result = voltage / resistance;
+                        currentSlider.value = result;
+                        currentDisplay.textContent = result.toFixed(2);
+                        currentResult.textContent = result.toFixed(2) + ' A';
+                    }
+                    break;
+                case 'resistance':
+                    if (voltage > 0 && current > 0) {
+                        result = voltage / current;
+                        resistanceSlider.value = result;
+                        resistanceDisplay.textContent = result.toFixed(2);
+                        resistanceResult.textContent = result.toFixed(2) + ' Ω';
+                    }
+                    break;
+            }
+        }
+
+        voltageSlider.addEventListener('input', () => {
+            voltageDisplay.textContent = voltageSlider.value;
+            calculate();
+        });
+
+        currentSlider.addEventListener('input', () => {
+            currentDisplay.textContent = currentSlider.value;
+            calculate();
+        });
+
+        resistanceSlider.addEventListener('input', () => {
+            resistanceDisplay.textContent = resistanceSlider.value;
+            calculate();
+        });
+
+        calcModeRadios.forEach(radio => {
+            radio.addEventListener('change', calculate);
+        });
+
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>

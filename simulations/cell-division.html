@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cell Division Simulator</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🧬 Cell Division Simulator</h1>
+        </div>
+    </header>
+
+    <main class="simulation-container">
+        <a href="../index.html" class="back-link">← Back to All Simulations</a>
+        
+        <div class="simulation-header">
+            <p>Watch the stages of mitosis unfold!</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Current Stage: <strong><span id="stageName">Interphase</span></strong></label>
+            </div>
+            
+            <div class="button-group">
+                <button class="control-btn" id="prevBtn">← Previous Stage</button>
+                <button class="control-btn" id="playBtn">Play Auto</button>
+                <button class="control-btn" id="nextBtn">Next Stage →</button>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="canvas" width="600" height="600"></canvas>
+        </div>
+
+        <div class="info-panel">
+            <h3 id="stageTitle">Interphase</h3>
+            <p id="stageDescription">The cell grows and duplicates its DNA in preparation for division. Chromosomes are not yet visible as they are loosely packed.</p>
+        </div>
+
+        <div class="info-panel">
+            <h3>About Mitosis:</h3>
+            <p>Mitosis is the process by which a cell divides its nucleus and genetic material into two identical daughter cells. It consists of several stages:</p>
+            <ul>
+                <li><strong>Interphase:</strong> Cell growth and DNA replication</li>
+                <li><strong>Prophase:</strong> Chromosomes condense and become visible</li>
+                <li><strong>Metaphase:</strong> Chromosomes align at the cell's center</li>
+                <li><strong>Anaphase:</strong> Sister chromatids separate and move to opposite poles</li>
+                <li><strong>Telophase:</strong> Nuclear membranes reform around each set of chromosomes</li>
+                <li><strong>Cytokinesis:</strong> Cell membrane pinches to form two daughter cells</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 GdocUniverse - Science Education Made Interactive</p>
+        </div>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const playBtn = document.getElementById('playBtn');
+        const stageName = document.getElementById('stageName');
+        const stageTitle = document.getElementById('stageTitle');
+        const stageDescription = document.getElementById('stageDescription');
+
+        let currentStage = 0;
+        let isPlaying = false;
+        let playInterval;
+
+        const stages = [
+            {
+                name: 'Interphase',
+                description: 'The cell grows and duplicates its DNA in preparation for division. Chromosomes are not yet visible as they are loosely packed.'
+            },
+            {
+                name: 'Prophase',
+                description: 'Chromosomes condense and become visible. The nuclear membrane begins to break down, and spindle fibers start to form.'
+            },
+            {
+                name: 'Metaphase',
+                description: 'Chromosomes align at the metaphase plate (center of the cell). Spindle fibers attach to the centromeres of each chromosome.'
+            },
+            {
+                name: 'Anaphase',
+                description: 'Sister chromatids separate and are pulled toward opposite poles of the cell by the spindle fibers.'
+            },
+            {
+                name: 'Telophase',
+                description: 'Chromosomes begin to decondense. Nuclear membranes reform around each set of chromosomes, creating two nuclei.'
+            },
+            {
+                name: 'Cytokinesis',
+                description: 'The cell membrane pinches inward, eventually splitting the cell into two identical daughter cells.'
+            }
+        ];
+
+        function drawCell(stage) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const cellRadius = 200;
+
+            switch(stage) {
+                case 0: // Interphase
+                    drawInterphase(centerX, centerY, cellRadius);
+                    break;
+                case 1: // Prophase
+                    drawProphase(centerX, centerY, cellRadius);
+                    break;
+                case 2: // Metaphase
+                    drawMetaphase(centerX, centerY, cellRadius);
+                    break;
+                case 3: // Anaphase
+                    drawAnaphase(centerX, centerY, cellRadius);
+                    break;
+                case 4: // Telophase
+                    drawTelophase(centerX, centerY, cellRadius);
+                    break;
+                case 5: // Cytokinesis
+                    drawCytokinesis(centerX, centerY, cellRadius);
+                    break;
+            }
+        }
+
+        function drawInterphase(x, y, r) {
+            // Cell membrane
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Nucleus
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.2)';
+            ctx.beginPath();
+            ctx.arc(x, y, r * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#667eea';
+            ctx.stroke();
+
+            // Chromatin (loose DNA)
+            ctx.fillStyle = '#764ba2';
+            for (let i = 0; i < 20; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = Math.random() * r * 0.3;
+                const px = x + Math.cos(angle) * dist;
+                const py = y + Math.sin(angle) * dist;
+                ctx.beginPath();
+                ctx.arc(px, py, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Cytoplasm organelles
+            drawOrganelles(x, y, r);
+        }
+
+        function drawProphase(x, y, r) {
+            // Cell membrane
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Fading nucleus
+            ctx.strokeStyle = 'rgba(102, 126, 234, 0.3)';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.arc(x, y, r * 0.4, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Condensed chromosomes
+            drawChromosomes(x, y, r, 4, true);
+
+            // Spindle fibers forming
+            drawSpindleFibers(x, y, r, 0.3);
+
+            drawOrganelles(x, y, r);
+        }
+
+        function drawMetaphase(x, y, r) {
+            // Cell membrane
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Chromosomes aligned at center
+            const chromosomeCount = 4;
+            for (let i = 0; i < chromosomeCount; i++) {
+                const offsetX = (i - chromosomeCount / 2 + 0.5) * 40;
+                drawChromosome(x + offsetX, y, 15, 30, '#764ba2');
+            }
+
+            // Spindle fibers
+            drawSpindleFibers(x, y, r, 0.7);
+
+            drawOrganelles(x, y, r);
+        }
+
+        function drawAnaphase(x, y, r) {
+            // Cell membrane
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Separating chromosomes
+            const chromosomeCount = 4;
+            const separation = 80;
+            
+            // Top set
+            for (let i = 0; i < chromosomeCount; i++) {
+                const offsetX = (i - chromosomeCount / 2 + 0.5) * 30;
+                drawChromosome(x + offsetX, y - separation, 12, 25, '#764ba2');
+            }
+            
+            // Bottom set
+            for (let i = 0; i < chromosomeCount; i++) {
+                const offsetX = (i - chromosomeCount / 2 + 0.5) * 30;
+                drawChromosome(x + offsetX, y + separation, 12, 25, '#764ba2');
+            }
+
+            // Spindle fibers pulling
+            drawSpindleFibers(x, y, r, 1);
+
+            drawOrganelles(x, y, r);
+        }
+
+        function drawTelophase(x, y, r) {
+            // Cell membrane starting to pinch
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(x, y, r, r * 1.1, 0, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Two reforming nuclei
+            const nucOffset = r * 0.5;
+            
+            // Top nucleus
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.2)';
+            ctx.beginPath();
+            ctx.arc(x, y - nucOffset, r * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#667eea';
+            ctx.stroke();
+
+            // Bottom nucleus
+            ctx.beginPath();
+            ctx.arc(x, y + nucOffset, r * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Decondensing chromosomes
+            drawChromosomes(x, y - nucOffset, r * 0.3, 2, false);
+            drawChromosomes(x, y + nucOffset, r * 0.3, 2, false);
+
+            drawOrganelles(x, y, r);
+        }
+
+        function drawCytokinesis(x, y, r) {
+            const offset = r * 0.6;
+            
+            // Two daughter cells
+            // Top cell
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(x, y - offset, r * 0.7, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Top nucleus
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.2)';
+            ctx.beginPath();
+            ctx.arc(x, y - offset, r * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#667eea';
+            ctx.stroke();
+
+            // Bottom cell
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(x, y + offset, r * 0.7, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Bottom nucleus
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.2)';
+            ctx.beginPath();
+            ctx.arc(x, y + offset, r * 0.3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#667eea';
+            ctx.stroke();
+
+            drawOrganelles(x, y - offset, r * 0.7);
+            drawOrganelles(x, y + offset, r * 0.7);
+        }
+
+        function drawChromosome(x, y, width, height, color) {
+            ctx.fillStyle = color;
+            
+            // Draw X-shaped chromosome
+            ctx.beginPath();
+            ctx.ellipse(x - width/4, y, width/2, height/2, Math.PI/4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.ellipse(x + width/4, y, width/2, height/2, -Math.PI/4, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Centromere
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(x, y, width/3, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawChromosomes(x, y, r, count, spread) {
+            for (let i = 0; i < count; i++) {
+                const angle = (i / count) * Math.PI * 2;
+                const dist = spread ? r * 0.3 : r * 0.15;
+                const cx = x + Math.cos(angle) * dist;
+                const cy = y + Math.sin(angle) * dist;
+                drawChromosome(cx, cy, 12, 25, '#764ba2');
+            }
+        }
+
+        function drawSpindleFibers(x, y, r, intensity) {
+            ctx.strokeStyle = `rgba(200, 200, 200, ${intensity})`;
+            ctx.lineWidth = 1;
+            
+            // Fibers from top
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(x, y - r * 0.6);
+                ctx.lineTo(x + Math.cos(angle) * 40, y + Math.sin(angle) * 40);
+                ctx.stroke();
+            }
+            
+            // Fibers from bottom
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                ctx.beginPath();
+                ctx.moveTo(x, y + r * 0.6);
+                ctx.lineTo(x + Math.cos(angle) * 40, y + Math.sin(angle) * 40);
+                ctx.stroke();
+            }
+        }
+
+        function drawOrganelles(x, y, r) {
+            ctx.fillStyle = 'rgba(255, 150, 150, 0.5)';
+            for (let i = 0; i < 10; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = r * 0.5 + Math.random() * r * 0.3;
+                const px = x + Math.cos(angle) * dist;
+                const py = y + Math.sin(angle) * dist;
+                ctx.beginPath();
+                ctx.arc(px, py, 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function updateStage() {
+            const stage = stages[currentStage];
+            stageName.textContent = stage.name;
+            stageTitle.textContent = stage.name;
+            stageDescription.textContent = stage.description;
+            drawCell(currentStage);
+            
+            prevBtn.disabled = currentStage === 0;
+            nextBtn.disabled = currentStage === stages.length - 1;
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentStage > 0) {
+                currentStage--;
+                updateStage();
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentStage < stages.length - 1) {
+                currentStage++;
+                updateStage();
+            }
+        });
+
+        playBtn.addEventListener('click', () => {
+            if (isPlaying) {
+                clearInterval(playInterval);
+                playBtn.textContent = 'Play Auto';
+                isPlaying = false;
+            } else {
+                playBtn.textContent = 'Pause';
+                isPlaying = true;
+                playInterval = setInterval(() => {
+                    if (currentStage < stages.length - 1) {
+                        currentStage++;
+                        updateStage();
+                    } else {
+                        currentStage = 0;
+                        updateStage();
+                    }
+                }, 2000);
+            }
+        });
+
+        // Initial draw
+        updateStage();
+    </script>
+</body>
+</html>

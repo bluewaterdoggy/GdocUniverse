@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pH Scale Explorer</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        .ph-scale {
+            display: flex;
+            height: 60px;
+            margin: 2rem 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .ph-segment {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        .indicator {
+            text-align: center;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+            font-size: 2rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        .example-card {
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+        }
+        .example-card:hover {
+            transform: translateY(-3px);
+            border-color: #667eea;
+        }
+        .example-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🧪 pH Scale Explorer</h1>
+        </div>
+    </header>
+
+    <main class="simulation-container">
+        <a href="../index.html" class="back-link">← Back to All Simulations</a>
+        
+        <div class="simulation-header">
+            <p>Explore the pH scale and learn about acids and bases!</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="phSlider">pH Value: <span id="phValue">7.0</span></label>
+                <input type="range" id="phSlider" min="0" max="14" value="7" step="0.1">
+            </div>
+        </div>
+
+        <div class="indicator" id="indicator">
+            NEUTRAL
+        </div>
+
+        <div class="ph-scale">
+            <div class="ph-segment" style="background: #d32f2f;">0</div>
+            <div class="ph-segment" style="background: #e53935;">1</div>
+            <div class="ph-segment" style="background: #f44336;">2</div>
+            <div class="ph-segment" style="background: #ff5722;">3</div>
+            <div class="ph-segment" style="background: #ff6f00;">4</div>
+            <div class="ph-segment" style="background: #ff9800;">5</div>
+            <div class="ph-segment" style="background: #ffa726;">6</div>
+            <div class="ph-segment" style="background: #4caf50;">7</div>
+            <div class="ph-segment" style="background: #66bb6a;">8</div>
+            <div class="ph-segment" style="background: #81c784;">9</div>
+            <div class="ph-segment" style="background: #42a5f5;">10</div>
+            <div class="ph-segment" style="background: #1e88e5;">11</div>
+            <div class="ph-segment" style="background: #1565c0;">12</div>
+            <div class="ph-segment" style="background: #0d47a1;">13</div>
+            <div class="ph-segment" style="background: #01579b;">14</div>
+        </div>
+
+        <div class="info-panel">
+            <h3>Common Substances by pH:</h3>
+            <p>Click on any substance to set the pH scale:</p>
+            <div class="examples-grid" id="examplesGrid"></div>
+        </div>
+
+        <div class="info-panel">
+            <h3>About pH:</h3>
+            <p>The pH scale measures how acidic or basic a substance is. It ranges from 0 to 14:</p>
+            <ul>
+                <li><strong>pH 0-6:</strong> Acidic (more H⁺ ions)</li>
+                <li><strong>pH 7:</strong> Neutral (pure water)</li>
+                <li><strong>pH 8-14:</strong> Basic/Alkaline (more OH⁻ ions)</li>
+            </ul>
+            <p>Each step represents a 10-fold difference in acidity or basicity. For example, pH 4 is 10 times more acidic than pH 5.</p>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 GdocUniverse - Science Education Made Interactive</p>
+        </div>
+    </footer>
+
+    <script>
+        const phSlider = document.getElementById('phSlider');
+        const phValue = document.getElementById('phValue');
+        const indicator = document.getElementById('indicator');
+        const examplesGrid = document.getElementById('examplesGrid');
+
+        const substances = [
+            { name: 'Battery Acid', ph: 0.5, icon: '🔋' },
+            { name: 'Lemon Juice', ph: 2.0, icon: '🍋' },
+            { name: 'Vinegar', ph: 2.5, icon: '🧴' },
+            { name: 'Orange Juice', ph: 3.5, icon: '🍊' },
+            { name: 'Tomato Juice', ph: 4.0, icon: '🍅' },
+            { name: 'Coffee', ph: 5.0, icon: '☕' },
+            { name: 'Milk', ph: 6.5, icon: '🥛' },
+            { name: 'Pure Water', ph: 7.0, icon: '💧' },
+            { name: 'Sea Water', ph: 8.0, icon: '🌊' },
+            { name: 'Baking Soda', ph: 9.0, icon: '🧂' },
+            { name: 'Milk of Magnesia', ph: 10.5, icon: '💊' },
+            { name: 'Ammonia', ph: 11.5, icon: '🧪' },
+            { name: 'Bleach', ph: 12.5, icon: '🧴' },
+            { name: 'Drain Cleaner', ph: 14.0, icon: '⚠️' }
+        ];
+
+        // Create example cards
+        substances.forEach(substance => {
+            const card = document.createElement('div');
+            card.className = 'example-card';
+            card.innerHTML = `
+                <div class="example-icon">${substance.icon}</div>
+                <strong>${substance.name}</strong><br>
+                <small>pH ${substance.ph}</small>
+            `;
+            card.addEventListener('click', () => {
+                phSlider.value = substance.ph;
+                updateDisplay();
+            });
+            examplesGrid.appendChild(card);
+        });
+
+        function getColorForPH(ph) {
+            if (ph < 1) return '#d32f2f';
+            else if (ph < 2) return '#e53935';
+            else if (ph < 3) return '#f44336';
+            else if (ph < 4) return '#ff5722';
+            else if (ph < 5) return '#ff6f00';
+            else if (ph < 6) return '#ff9800';
+            else if (ph < 7) return '#ffa726';
+            else if (ph < 8) return '#4caf50';
+            else if (ph < 9) return '#66bb6a';
+            else if (ph < 10) return '#81c784';
+            else if (ph < 11) return '#42a5f5';
+            else if (ph < 12) return '#1e88e5';
+            else if (ph < 13) return '#1565c0';
+            else if (ph < 14) return '#0d47a1';
+            else return '#01579b';
+        }
+
+        function updateDisplay() {
+            const ph = parseFloat(phSlider.value);
+            phValue.textContent = ph.toFixed(1);
+            
+            const color = getColorForPH(ph);
+            indicator.style.backgroundColor = color;
+            indicator.style.color = 'white';
+            
+            let text = '';
+            if (ph < 3) {
+                text = 'STRONG ACID';
+            } else if (ph < 6) {
+                text = 'WEAK ACID';
+            } else if (ph < 7) {
+                text = 'SLIGHTLY ACIDIC';
+            } else if (ph === 7) {
+                text = 'NEUTRAL';
+            } else if (ph < 8) {
+                text = 'SLIGHTLY BASIC';
+            } else if (ph < 11) {
+                text = 'WEAK BASE';
+            } else {
+                text = 'STRONG BASE';
+            }
+            
+            indicator.textContent = text;
+        }
+
+        phSlider.addEventListener('input', updateDisplay);
+        
+        // Initial display
+        updateDisplay();
+    </script>
+</body>
+</html>

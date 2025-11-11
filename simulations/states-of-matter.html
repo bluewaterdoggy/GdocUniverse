@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>States of Matter Simulator</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🌡️ States of Matter Simulator</h1>
+        </div>
+    </header>
+
+    <main class="simulation-container">
+        <a href="../index.html" class="back-link">← Back to All Simulations</a>
+        
+        <div class="simulation-header">
+            <p>See how temperature affects the movement of particles in different states of matter!</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="temperature">Temperature: <span id="tempValue">25</span>°C</label>
+                <input type="range" id="temperature" min="-50" max="150" value="25" step="1">
+            </div>
+            
+            <div class="control-group">
+                <label>Current State: <strong><span id="stateLabel">LIQUID</span></strong></label>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="canvas" width="600" height="400"></canvas>
+        </div>
+
+        <div class="info-panel">
+            <h3 id="stateTitle">Liquid State</h3>
+            <p id="stateDescription">Particles are close together but can move past each other. The substance has a definite volume but takes the shape of its container.</p>
+        </div>
+
+        <div class="info-panel">
+            <h3>About States of Matter:</h3>
+            <p>Matter exists in different states depending on temperature and pressure. The three common states are:</p>
+            <ul>
+                <li><strong>Solid (below 0°C for water):</strong> Particles vibrate in fixed positions. Definite shape and volume.</li>
+                <li><strong>Liquid (0°C to 100°C for water):</strong> Particles can move past each other. Definite volume but takes container's shape.</li>
+                <li><strong>Gas (above 100°C for water):</strong> Particles move freely and quickly. No definite shape or volume, expands to fill container.</li>
+            </ul>
+            <p><strong>Phase Transitions:</strong></p>
+            <ul>
+                <li>Melting: Solid → Liquid (adding heat)</li>
+                <li>Freezing: Liquid → Solid (removing heat)</li>
+                <li>Vaporization: Liquid → Gas (adding heat)</li>
+                <li>Condensation: Gas → Liquid (removing heat)</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 GdocUniverse - Science Education Made Interactive</p>
+        </div>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const temperatureSlider = document.getElementById('temperature');
+        const tempValue = document.getElementById('tempValue');
+        const stateLabel = document.getElementById('stateLabel');
+        const stateTitle = document.getElementById('stateTitle');
+        const stateDescription = document.getElementById('stateDescription');
+
+        const particles = [];
+        const numParticles = 80;
+        let animationId;
+
+        const states = {
+            solid: {
+                name: 'SOLID',
+                title: 'Solid State',
+                description: 'Particles vibrate in fixed positions with strong intermolecular forces holding them together. The substance has a definite shape and volume.',
+                color: '#4A90E2',
+                speedMultiplier: 0.3,
+                jiggle: 2
+            },
+            liquid: {
+                name: 'LIQUID',
+                title: 'Liquid State',
+                description: 'Particles are close together but can move past each other. The substance has a definite volume but takes the shape of its container.',
+                color: '#50C878',
+                speedMultiplier: 1,
+                jiggle: 0
+            },
+            gas: {
+                name: 'GAS',
+                title: 'Gas State',
+                description: 'Particles move freely and rapidly in all directions. The substance has no definite shape or volume and expands to fill its container.',
+                color: '#FF6B6B',
+                speedMultiplier: 3,
+                jiggle: 0
+            }
+        };
+
+        class Particle {
+            constructor(x, y, fixedX, fixedY) {
+                this.x = x;
+                this.y = y;
+                this.fixedX = fixedX;
+                this.fixedY = fixedY;
+                this.vx = (Math.random() - 0.5) * 2;
+                this.vy = (Math.random() - 0.5) * 2;
+                this.radius = 8;
+            }
+
+            update(state) {
+                if (state === 'solid') {
+                    // Vibrate around fixed position
+                    const jiggleAmount = states.solid.jiggle;
+                    this.x = this.fixedX + (Math.random() - 0.5) * jiggleAmount * 2;
+                    this.y = this.fixedY + (Math.random() - 0.5) * jiggleAmount * 2;
+                } else {
+                    const speedMult = states[state].speedMultiplier;
+                    
+                    // Update position
+                    this.x += this.vx * speedMult;
+                    this.y += this.vy * speedMult;
+
+                    // Bounce off walls
+                    if (this.x - this.radius < 0 || this.x + this.radius > canvas.width) {
+                        this.vx *= -1;
+                        this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
+                    }
+                    if (this.y - this.radius < 0 || this.y + this.radius > canvas.height) {
+                        this.vy *= -1;
+                        this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
+                    }
+
+                    // Particle collisions (simplified)
+                    if (state === 'liquid') {
+                        particles.forEach(other => {
+                            if (other !== this) {
+                                const dx = other.x - this.x;
+                                const dy = other.y - this.y;
+                                const distance = Math.sqrt(dx * dx + dy * dy);
+                                
+                                if (distance < this.radius * 2) {
+                                    const angle = Math.atan2(dy, dx);
+                                    const targetX = this.x + Math.cos(angle) * this.radius * 2;
+                                    const targetY = this.y + Math.sin(angle) * this.radius * 2;
+                                    const ax = (targetX - other.x) * 0.05;
+                                    const ay = (targetY - other.y) * 0.05;
+                                    this.vx -= ax;
+                                    this.vy -= ay;
+                                    other.vx += ax;
+                                    other.vy += ay;
+                                }
+                            }
+                        });
+                    }
+
+                    // Apply slight damping for liquid
+                    if (state === 'liquid') {
+                        this.vx *= 0.99;
+                        this.vy *= 0.99;
+                        
+                        // Gravity effect for liquid
+                        this.vy += 0.05;
+                        
+                        // Keep particles in lower half for liquid
+                        if (this.y < canvas.height * 0.3) {
+                            this.vy += 0.1;
+                        }
+                    }
+                }
+            }
+
+            draw(color) {
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add glow effect
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.beginPath();
+                ctx.arc(this.x - 2, this.y - 2, this.radius * 0.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles.length = 0;
+            const cols = 10;
+            const rows = 8;
+            const spacing = 40;
+            const startX = (canvas.width - (cols - 1) * spacing) / 2;
+            const startY = (canvas.height - (rows - 1) * spacing) / 2;
+
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const x = startX + j * spacing;
+                    const y = startY + i * spacing;
+                    particles.push(new Particle(x, y, x, y));
+                }
+            }
+        }
+
+        function getState(temp) {
+            if (temp < 0) return 'solid';
+            else if (temp < 100) return 'liquid';
+            else return 'gas';
+        }
+
+        function draw() {
+            const temp = parseFloat(temperatureSlider.value);
+            const state = getState(temp);
+            const stateInfo = states[state];
+
+            ctx.fillStyle = getBackgroundColor(state);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw container for liquid
+            if (state === 'liquid') {
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.moveTo(50, canvas.height - 50);
+                ctx.lineTo(50, canvas.height * 0.3);
+                ctx.moveTo(50, canvas.height - 50);
+                ctx.lineTo(canvas.width - 50, canvas.height - 50);
+                ctx.moveTo(canvas.width - 50, canvas.height - 50);
+                ctx.lineTo(canvas.width - 50, canvas.height * 0.3);
+                ctx.stroke();
+            }
+
+            // Update and draw particles
+            particles.forEach(particle => {
+                particle.update(state);
+                particle.draw(stateInfo.color);
+            });
+
+            // Draw temperature label
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText(`${temp}°C`, 20, 30);
+
+            animationId = requestAnimationFrame(draw);
+        }
+
+        function getBackgroundColor(state) {
+            switch(state) {
+                case 'solid': return '#E8F4F8';
+                case 'liquid': return '#F0F8F0';
+                case 'gas': return '#FFF0F0';
+                default: return 'white';
+            }
+        }
+
+        function updateState() {
+            const temp = parseFloat(temperatureSlider.value);
+            const state = getState(temp);
+            const stateInfo = states[state];
+
+            tempValue.textContent = temp;
+            stateLabel.textContent = stateInfo.name;
+            stateTitle.textContent = stateInfo.title;
+            stateDescription.textContent = stateInfo.description;
+
+            // Reset particles when changing states
+            if (state === 'solid') {
+                particles.forEach(p => {
+                    p.x = p.fixedX;
+                    p.y = p.fixedY;
+                });
+            }
+        }
+
+        temperatureSlider.addEventListener('input', updateState);
+
+        // Initialize
+        initParticles();
+        updateState();
+        draw();
+    </script>
+</body>
+</html>

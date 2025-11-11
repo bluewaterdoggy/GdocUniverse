@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projectile Motion Simulator</title>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>⚛️ Projectile Motion Simulator</h1>
+        </div>
+    </header>
+
+    <main class="simulation-container">
+        <a href="../index.html" class="back-link">← Back to All Simulations</a>
+        
+        <div class="simulation-header">
+            <p>Adjust the angle and velocity to see how they affect the projectile's trajectory!</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="angle">Launch Angle: <span id="angleValue">45</span>°</label>
+                <input type="range" id="angle" min="0" max="90" value="45" step="1">
+            </div>
+            
+            <div class="control-group">
+                <label for="velocity">Initial Velocity: <span id="velocityValue">50</span> m/s</label>
+                <input type="range" id="velocity" min="10" max="100" value="50" step="1">
+            </div>
+            
+            <div class="control-group">
+                <label for="gravity">Gravity: <span id="gravityValue">9.8</span> m/s²</label>
+                <input type="range" id="gravity" min="1" max="20" value="9.8" step="0.1">
+            </div>
+            
+            <div class="button-group">
+                <button class="control-btn" id="launchBtn">Launch</button>
+                <button class="control-btn" id="resetBtn">Reset</button>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="canvas" width="800" height="400"></canvas>
+        </div>
+
+        <div class="info-panel">
+            <h3>Results:</h3>
+            <p><strong>Maximum Height:</strong> <span id="maxHeight">-</span></p>
+            <p><strong>Range (Horizontal Distance):</strong> <span id="range">-</span></p>
+            <p><strong>Flight Time:</strong> <span id="flightTime">-</span></p>
+        </div>
+
+        <div class="info-panel">
+            <h3>About Projectile Motion:</h3>
+            <p>Projectile motion is the motion of an object thrown or projected into the air, subject only to the acceleration of gravity. The object is called a projectile, and its path is called its trajectory.</p>
+            <p>Key factors affecting projectile motion:</p>
+            <ul>
+                <li><strong>Launch Angle:</strong> Determines the direction of initial velocity</li>
+                <li><strong>Initial Velocity:</strong> The speed at which the projectile is launched</li>
+                <li><strong>Gravity:</strong> Pulls the projectile downward (9.8 m/s² on Earth)</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 GdocUniverse - Science Education Made Interactive</p>
+        </div>
+    </footer>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const angleSlider = document.getElementById('angle');
+        const velocitySlider = document.getElementById('velocity');
+        const gravitySlider = document.getElementById('gravity');
+        const angleValue = document.getElementById('angleValue');
+        const velocityValue = document.getElementById('velocityValue');
+        const gravityValue = document.getElementById('gravityValue');
+        const launchBtn = document.getElementById('launchBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const maxHeightSpan = document.getElementById('maxHeight');
+        const rangeSpan = document.getElementById('range');
+        const flightTimeSpan = document.getElementById('flightTime');
+
+        let animationId;
+        let isAnimating = false;
+
+        angleSlider.addEventListener('input', () => {
+            angleValue.textContent = angleSlider.value;
+            if (!isAnimating) drawTrajectory();
+        });
+
+        velocitySlider.addEventListener('input', () => {
+            velocityValue.textContent = velocitySlider.value;
+            if (!isAnimating) drawTrajectory();
+        });
+
+        gravitySlider.addEventListener('input', () => {
+            gravityValue.textContent = gravitySlider.value;
+            if (!isAnimating) drawTrajectory();
+        });
+
+        launchBtn.addEventListener('click', animate);
+        resetBtn.addEventListener('click', reset);
+
+        function drawGround() {
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(0, canvas.height - 35, canvas.width, 5);
+        }
+
+        function drawTrajectory() {
+            const angle = angleSlider.value * Math.PI / 180;
+            const v0 = parseFloat(velocitySlider.value);
+            const g = parseFloat(gravitySlider.value);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawGround();
+
+            // Draw trajectory path
+            ctx.beginPath();
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+
+            const scale = 5;
+            const startX = 50;
+            const groundY = canvas.height - 35;
+
+            for (let t = 0; t <= 10; t += 0.1) {
+                const x = v0 * Math.cos(angle) * t * scale;
+                const y = v0 * Math.sin(angle) * t - 0.5 * g * t * t;
+                
+                if (y < 0) break;
+                
+                const canvasX = startX + x;
+                const canvasY = groundY - y * scale;
+                
+                if (t === 0) {
+                    ctx.moveTo(canvasX, canvasY);
+                } else {
+                    ctx.lineTo(canvasX, canvasY);
+                }
+            }
+            
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Draw cannon
+            ctx.fillStyle = '#333';
+            ctx.beginPath();
+            ctx.arc(startX, groundY, 15, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(startX, groundY);
+            ctx.lineTo(startX + Math.cos(angle) * 30, groundY - Math.sin(angle) * 30);
+            ctx.stroke();
+        }
+
+        function animate() {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            const angle = angleSlider.value * Math.PI / 180;
+            const v0 = parseFloat(velocitySlider.value);
+            const g = parseFloat(gravitySlider.value);
+            
+            const scale = 5;
+            const startX = 50;
+            const groundY = canvas.height - 35;
+            const startTime = Date.now();
+            
+            function draw() {
+                const t = (Date.now() - startTime) / 1000;
+                const x = v0 * Math.cos(angle) * t * scale;
+                const y = v0 * Math.sin(angle) * t - 0.5 * g * t * t;
+                
+                if (y < 0) {
+                    isAnimating = false;
+                    calculateResults();
+                    return;
+                }
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawGround();
+                
+                // Draw trajectory so far
+                ctx.beginPath();
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 2;
+                
+                for (let time = 0; time <= t; time += 0.05) {
+                    const px = v0 * Math.cos(angle) * time * scale;
+                    const py = v0 * Math.sin(angle) * time - 0.5 * g * time * time;
+                    
+                    if (time === 0) {
+                        ctx.moveTo(startX + px, groundY - py * scale);
+                    } else {
+                        ctx.lineTo(startX + px, groundY - py * scale);
+                    }
+                }
+                ctx.stroke();
+                
+                // Draw cannon
+                ctx.fillStyle = '#333';
+                ctx.beginPath();
+                ctx.arc(startX, groundY, 15, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 8;
+                ctx.beginPath();
+                ctx.moveTo(startX, groundY);
+                ctx.lineTo(startX + Math.cos(angle) * 30, groundY - Math.sin(angle) * 30);
+                ctx.stroke();
+                
+                // Draw projectile
+                ctx.fillStyle = '#FF6347';
+                ctx.beginPath();
+                ctx.arc(startX + x, groundY - y * scale, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                animationId = requestAnimationFrame(draw);
+            }
+            
+            draw();
+        }
+
+        function calculateResults() {
+            const angle = angleSlider.value * Math.PI / 180;
+            const v0 = parseFloat(velocitySlider.value);
+            const g = parseFloat(gravitySlider.value);
+            
+            const maxHeight = (v0 * v0 * Math.sin(angle) * Math.sin(angle)) / (2 * g);
+            const range = (v0 * v0 * Math.sin(2 * angle)) / g;
+            const flightTime = (2 * v0 * Math.sin(angle)) / g;
+            
+            maxHeightSpan.textContent = maxHeight.toFixed(2) + ' m';
+            rangeSpan.textContent = range.toFixed(2) + ' m';
+            flightTimeSpan.textContent = flightTime.toFixed(2) + ' s';
+        }
+
+        function reset() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            isAnimating = false;
+            maxHeightSpan.textContent = '-';
+            rangeSpan.textContent = '-';
+            flightTimeSpan.textContent = '-';
+            drawTrajectory();
+        }
+
+        // Initial draw
+        drawTrajectory();
+    </script>
+</body>
+</html>
